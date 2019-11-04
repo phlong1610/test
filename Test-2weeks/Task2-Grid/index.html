@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Grid</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div>
+		<label for="row"></label><input type="number" placeholder="row" name="row">
+		<label for="col"></label><input type="number" placeholder="col" name="col">
+		<button type="button">Render</button>
+	</div>
+	<div class="box">
+		<table>
+			
+		</table>
+	</div>
+	<script>
+		const numbRow = document.querySelector('input[name="row"]');
+		const numbCol = document.querySelector('input[name="col"]');
+		const render = document.querySelector('button');
+		const boxGame = document.querySelector('table');
+		let boxes;
+		let dataArray = [];
+		function sort(){
+			const index = this.dataset.index;
+			dataArray.sort((a,b) => {
+				return a[index] - b[index];
+			})
+			sortBoxByColumn(dataArray);
+		}
+		function sortBoxByColumn(data){
+			let newRow = [];
+			let heading = '';
+			for(let col = 0; col < parseInt(numbCol.value); col++){
+				heading += `<th data-index="${col}" class="styleHover">${col+1}</th>`;
+			}
+			for(let row = 0; row < data.length; row++){
+				newRow[row] = '';
+				for(let col = 0; col < data[row].length; col++){
+					newRow[row] += `<td>${data[row][col]}</td>`;
+				}
+			}
+			newRow = newRow.map(row => `<tr>${row}</tr>`).join('');
+			boxGame.innerHTML = `<tr>${heading}</tr>` + newRow;
+			boxes = document.querySelectorAll('tr');
+			document.querySelectorAll('th').forEach(heading => heading.addEventListener('click',sort));
+		}
+		function renderRandomValue(){
+			if(parseInt(numbRow.value) === NaN || parseInt(numbCol.value) === NaN || parseInt(numbRow.value) < 1 || parseInt(numbCol.value) < 1 ) return;
+			let newRow = [];
+			let heading = '';
+			for(let col = 0; col < parseInt(numbCol.value); col++){
+				heading += `<th data-index="${col}" class="styleHover">${col+1}</th>`;
+			}
+			for(let row = 0; row < parseInt(numbRow.value); row++){
+				newRow[row] = '';
+				dataArray[row] = [];
+				for(let col = 0; col < parseInt(numbCol.value); col++){
+					const randValue = Math.ceil(Math.random() * 1000);
+					dataArray[row].push(randValue);
+					newRow[row] += `<td>${randValue}</td>`;
+				}
+			}
+			newRow = newRow.map(row => `<tr>${row}</tr>`).join('');
+			boxGame.innerHTML = `<tr>${heading}</tr>` + newRow;
+			boxes = document.querySelectorAll('tr');
+			document.querySelectorAll('th').forEach(heading => heading.addEventListener('click',sort));
+		}
+		render.addEventListener('click',renderRandomValue);
+	</script>
+</body>
+</html>

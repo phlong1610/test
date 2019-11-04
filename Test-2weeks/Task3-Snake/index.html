@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Snake</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div>
+		<button type="button" name="modeA" class="active">Mode A</button>
+		<button type="button" name="modeB">Mode B</button>
+		<table>
+		</table>
+	</div>
+	<script>
+		const interface = document.querySelector('table');
+		const modeA = document.querySelector('button[name="modeA"]');
+		const modeB = document.querySelector('button[name="modeB"]');
+		let nextIndex = 190;
+		let foodIndex = 0;
+		let lastAction = 0;
+		let mode = true;
+		let autoMove;
+		render();
+		foodIndex = randFood();
+		playGame(nextIndex);
+		function render(){
+			let boxes = [];
+			for(let row = 0; row < 20; row++){
+				let rowBox = '';
+				for(let col = 0; col < 20; col++){
+					rowBox += `<td class="empty" data-index="${row * 20 + col}"></td>`;
+				}
+				boxes.push(rowBox);
+			}
+			boxes = boxes.map(row => `<tr>${row}</tr>`).join('');
+			interface.innerHTML = boxes;
+		}
+		function randFood(){
+			let hasFood = document.querySelector('td[class="empty food"]');
+			if(hasFood !== null) hasFood.classList.remove('food');
+			let boxesEmpty = document.querySelectorAll('td[class="empty"]');
+			const food = Math.round(Math.random() * (boxesEmpty.length - 1));
+			boxesEmpty[food].classList.add('food');
+			return parseInt(boxesEmpty[food].dataset.index);
+		}
+		function playGame(index){
+			let boxes = document.querySelectorAll('td');
+			let moveBox;
+			boxes.forEach((box,idx) => {
+				if(idx === index) {box.classList.add('snake'); moveBox = box;}
+			})
+			return moveBox;
+		}
+
+		function eatFood(){
+			let headIndex = playGame(nextIndex);
+			if(nextIndex === foodIndex) {
+				headIndex.classList.remove('food');
+				lengthSnake.unshift(headIndex);
+				foodIndex = randFood();
+			}
+			else{
+				lengthSnake.unshift(headIndex);
+				let lastIndex = lengthSnake.pop();
+				lastIndex.classList.remove('snake');
+			}
+		}
+		function moveSnake(action){
+			if(action !== undefined) {
+				if(action.keyCode > 40 || action.keyCode < 37) return lastAction;
+				if(Math.abs(lastAction - action.keyCode) === 2) return lastAction;	// chặn đi lùi
+				lastAction = action.keyCode;
+			}
+			switch(lastAction){
+				case 37: {
+					if(mode && nextIndex % 20 === 0) {alert('Gameover!!!');window.removeEventListener('keydown',moveSnake); clearInterval(autoMove); return;}
+					nextIndex--;
+					if(nextIndex % 20 === 19) nextIndex +=20;
+					eatFood();
+					// currentBox = playGame(nextIndex);
+					// if(nextIndex === foodIndex) {
+					// 	currentBox.classList.remove('food');
+					// 	lengthSnake.unshift(currentBox);
+					// 	foodIndex = randFood();
+					// }
+					// else{
+					// 	lengthSnake.unshift(currentBox);
+					// 	lastBox = lengthSnake.pop();
+					// 	lastBox.classList.remove('snake');
+					// }
+				}
+				break;
+				case 38: {
+					if(mode && nextIndex < 20) {alert('Gameover!!!');window.removeEventListener('keydown',moveSnake); clearInterval(autoMove); return;}
+					nextIndex -= 20;
+					if(nextIndex < 0) nextIndex+= 400; 
+					eatFood();
+				}
+				break;
+				case 39: {
+					if(mode && nextIndex % 20 === 19) {alert('Gameover!!!');window.removeEventListener('keydown',moveSnake); clearInterval(autoMove); return;}
+					nextIndex++;
+					if(nextIndex % 20 === 0) nextIndex -=20;
+					eatFood();
+				}
+				break;
+				case 40: {
+					if(mode && nextIndex > 379) {alert('Gameover!!!');window.removeEventListener('keydown',moveSnake); clearInterval(autoMove); return;}
+					nextIndex += 20;
+					if(nextIndex > 399) nextIndex = nextIndex % 20;
+					eatFood();
+				}	
+				break;
+			}
+			return lastAction;
+		}
+		let lengthSnake = Array.from(document.querySelectorAll('td[class="empty snake"]'));
+		modeA.addEventListener('click',() => { 
+			mode = true; 
+			console.log('change to mode A');
+			modeA.classList.add('active');
+			modeB.classList.remove('active');
+		});
+		modeB.addEventListener('click',() => { 
+			mode = false; 
+			console.log('change to mode B');
+			modeB.classList.add('active');
+			modeA.classList.remove('active');
+		});
+		window.addEventListener('keydown',moveSnake);
+		autoMove = setInterval(function(){moveSnake();},1000);		
+	</script>
+</body>
+</html>

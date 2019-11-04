@@ -1,0 +1,36 @@
+body{
+	height: 100vh;
+	margin: 0;
+	text-align: center;
+}
+button{
+	margin: 20px 10px;
+}
+button.active{
+	background: #aaa;
+}
+table{
+	border-collapse: collapse;
+	text-align: center;
+	display: flex;
+	justify-content: center;
+}
+td.empty{
+	width: 10px;
+	height: 10px;
+	background: #bbb;
+	border: 1px solid #555;
+}
+
+td.food{
+	width: 10px;
+	height: 10px;
+	background: #f00;
+	border: 1px solid #555;
+}
+td.snake{
+	width: 10px;
+	height: 10px;
+	background: #000;
+	border: 1px solid #555;
+}

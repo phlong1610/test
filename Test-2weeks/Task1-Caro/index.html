@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Caro</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div>
+		<label for="size"></label><input type="number" placeholder="Size (default:3)" name="size">
+		<label for="count"></label><input type="number" placeholder="Count (default:3)" name="count">
+		<button type="button">Render</button>
+	</div>
+	<div class="box">
+		<button type="button" style="display: none;" class="reset">Reset</button>
+		<table>
+		</table>
+	</div>
+	<script>
+		const resetButton = document.querySelector('button[class="reset"]');
+		const sizeBox = document.querySelector('input[name="size"]');
+		const count = document.querySelector('input[name="count"]');
+		const render = document.querySelector('button');
+		const boxGame = document.querySelector('table');
+		let boxes;
+		const gamerOne = 'X';
+		const gamerTwo = 'O';
+		let size = 3;
+		let countbox = 3;
+		let turn = true;
+		function tick(){
+			if(turn){
+				this.innerText = gamerOne;
+				turn = false;
+				this.removeEventListener('click',tick);
+				this.classList.remove('styleHover');
+			}
+			else{
+				this.innerText = gamerTwo;
+				turn = true;
+				this.removeEventListener('click',tick);
+				this.classList.remove('styleHover');
+			}
+			if(checkrow(mapBox(boxes)) !== undefined || checkrow(rotateBox(boxes)) !== undefined || checkDiagonal(mapBox(boxes)) !== undefined || checkDiagonal(rotateBox(boxes)) !== undefined) {
+				const gamerWin = checkrow(mapBox(boxes)) || checkrow(rotateBox(boxes)) || checkDiagonal(mapBox(boxes)) || checkDiagonal(rotateBox(boxes));
+				setTimeout(function(){
+					alert(`The gamer ${gamerWin} win!!!`);
+					resetButton.style.display = 'inline';
+				},100);
+				boxes.forEach(box => box.removeEventListener('click',tick));
+			}
+			else setTimeout(function(){isExistValue(boxes);},100);
+		}
+		function isExistValue(boxes){
+			let newBoxes = Array.from(boxes).map(box => box.innerText);
+			if(newBoxes.every(box => box !== '')) { 
+				resetButton.style.display = 'inline';
+				alert('Draw game!!!');
+			}
+		}
+		function mapBox(boxes){
+			const mapBoxes = Array.from(boxes).map(box => box.innerText);
+			let newBoxes = [];
+			let index = 0;
+			for(let indexCol = 0; indexCol < mapBoxes.length; indexCol++){
+				if(indexCol % size === 0) {
+					if(indexCol !== 0) index++;
+					newBoxes[index] = [];
+				}
+				newBoxes[index].push(mapBoxes[indexCol]);
+			}
+			return newBoxes;
+		}
+		function checkrow(boxes){
+			let newBoxes = boxes;
+			for(let row = 0; row < size; row++){
+				for(let col = 0; col < size - countbox + 1; col++){
+					let hasWinner = true;
+					// debugger
+					if(newBoxes[row][col] !== '') {
+						for(let index = col + 1; index < countbox + col; index++){
+							if(newBoxes[row][index] !== newBoxes[row][col]){hasWinner = false; break;}
+						}
+						if(hasWinner){return newBoxes[row][col];} 
+					}
+				}
+			}
+		}
+		function rotateBox(boxes) {
+		    let newArr = [];
+		    let newBoxes = mapBox(boxes);
+		    for(let colBox = 0; colBox < size; colBox++){
+		        let row = [];
+		        for(let rowBox = size - 1; rowBox >= 0; rowBox--){
+		            row.push(newBoxes[rowBox][colBox]);
+		        }
+		        newArr.push(row);
+		    }
+		    return newArr;
+		}
+		function checkDiagonal(boxes){
+			for(let row = 0; row < size - countbox + 1; row++){
+				for(let col = 0 - row; col < size - countbox + 1 - row; col++){
+					let newArr = [];
+					for(let fromRow = row; fromRow < row + countbox; fromRow++){
+						newArr.push(boxes[fromRow][fromRow + col]);
+					}
+					if(newArr.every(item => item === 'X') || newArr.every(item => item === 'O')) return newArr[0];
+				}
+				
+			}
+		}
+		function renderBox(_size = 3){
+			let newRow = [];
+			for(let row = 0; row < _size; row++){
+				newRow[row] = '';
+				for(let col = 0; col < _size; col++){
+					newRow[row] += '<td class="styleHover"></td>';
+				}
+			}
+			newRow = newRow.map(row => `<tr>${row}</tr>`).join('');
+			boxGame.innerHTML = newRow;
+			boxes = document.querySelectorAll('td');
+			boxes.forEach(box => box.addEventListener('click',tick));
+		}
+		resetButton.addEventListener('click',function(){
+			this.style.display = 'none';
+			if(boxes !== undefined) boxes.forEach(box => {
+				box.innerText = '';
+				box.addEventListener('click',tick);
+				box.classList.add('styleHover');
+			})
+		});
+		renderBox();
+		render.addEventListener('click',function(){
+			size = parseInt(sizeBox.value) || 3;		// check input size
+			countbox = parseInt(count.value) || 3;		// check input count
+			if(parseInt(sizeBox.value) < 2)  { alert('Min size = 2'); size = 3; sizeBox.value = ''; return; } 	// default size = 3*3
+			if(parseInt(count.value) < 2) { alert('Min count = 2'); countbox = 3; count.value = ''; return; } 	// default count = 3 => win
+			if(countbox > size) { alert('Input count <= size'); size = 3; countbox = 3; return; }		// compare count & size
+			renderBox(size);
+		});
+	</script>
+</body>
+</html>
